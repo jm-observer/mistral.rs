@@ -112,6 +112,16 @@ where
                                 break;
                             }
                             assistant_reply.push_str(token);
+                        } else if let Some(reasoning) = &choice.delta.reasoning_content {
+                            let reasoning_fmt = format!("<think>{}</think>", reasoning);
+                            if socket
+                                .send(Message::Text(reasoning_fmt.into()))
+                                .await
+                                .is_err()
+                            {
+                                break;
+                            }
+                            assistant_reply.push_str(reasoning);
                         }
                     }
                 }

@@ -66,6 +66,7 @@ path = "examples/getting_started/embedding/main.rs"
 [[example]]
 name = "text_models"
 path = "examples/models/text_models/main.rs"
+required-features = ["cuda"]
 
 [[example]]
 name = "vision_models"

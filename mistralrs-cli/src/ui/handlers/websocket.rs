@@ -5,7 +5,7 @@ use axum::{
 };
 use futures_util::stream::StreamExt;
 use mistralrs::{
-    AudioInput, Model, RequestBuilder, TextMessageRole, TextMessages, VisionMessages,
+    AudioInput, Model, RequestBuilder, RequestLike, TextMessageRole, TextMessages, VisionMessages,
     WebSearchOptions,
 };
 use serde::{Deserialize, Serialize};
@@ -73,7 +73,7 @@ fn apply_gen_params(
         .set_sampler_topp(top_p)
         .set_sampler_topk(top_k)
         .set_sampler_max_len(max_tokens)
-        .set_sampler_frequency_penalty(rep_penalty);
+        .set_sampler_repetition_penalty(rep_penalty);
 
     builder
 }
@@ -92,7 +92,7 @@ async fn stream_and_forward<Msgs>(
     model_id: &str,
 ) -> Result<String, anyhow::Error>
 where
-    Msgs: mistralrs::RequestLike + Send + 'static,
+    Msgs: RequestLike + Send + 'static,
 {
     match model
         .stream_chat_request_with_model(msgs, Some(model_id))
@@ -125,6 +125,32 @@ where
                         }
                     }
                 }
+                // match chunk {
+                //     mistralrs::Response::Chunk(resp) => {
+                //         if let Some(choice) = resp.choices.first() {
+                //             if let Some(token) = &choice.delta.content {
+                //                 if socket
+                //                     .send(Message::Text(token.clone().into()))
+                //                     .await
+                //                     .is_err()
+                //                 {
+                //                     break;
+                //                 }
+                //                 assistant_reply.push_str(token);
+                //             } else if let Some(reasoning) = &choice.delta.reasoning_content {
+                //                 if socket
+                //                     .send(Message::Text(reasoning.clone().into()))
+                //                     .await
+                //                     .is_err()
+                //                 {
+                //                     break;
+                //                 }
+                //                 assistant_reply.push_str(reasoning);
+                //             }
+                //         }
+                //     }
+                //     _ => {}
+                // }
             }
             Ok(assistant_reply)
         }
@@ -370,7 +396,7 @@ pub async fn handle_socket(mut socket: WebSocket, app: Arc<AppState>) {
             }
             if let Some(audio) = val.get("audio").and_then(|v| v.as_str()) {
                 if let Ok(path) = validate_audio_path(audio) {
-                    if let Ok(bytes) = std::fs::read(path) {
+                    if let Ok(bytes) = std::fs::read(&path) {
                         if let Ok(audio) = AudioInput::from_bytes(&bytes) {
                             audio_buffer.push(audio);
                         }

@@ -20,7 +20,7 @@ use mistralrs_core::{
 };
 use serde_json::Value;
 use tokio::sync::mpsc::{Receiver, Sender};
-
+use tracing::info;
 use crate::{
     completion_core::{
         convert_stop_tokens, get_dry_sampling_params, handle_completion_error,
@@ -625,6 +625,8 @@ pub async fn chatcompletions(
         Ok(x) => x,
         Err(e) => return handle_error(state, e.into()),
     };
+
+    info!("chatcompletions {request:?}");
 
     if let Err(e) = send_request_with_model(&state, request, model_id.as_deref()).await {
         return handle_error(state, e.into());

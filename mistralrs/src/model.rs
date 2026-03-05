@@ -6,7 +6,7 @@ use std::pin::Pin;
 use std::task::{Context as TaskContext, Poll};
 use std::{path::PathBuf, sync::Arc};
 use tokio::sync::mpsc::{channel, Receiver};
-
+use tracing::info;
 use crate::error::Error as SdkError;
 use crate::{EmbeddingRequest, EmbeddingRequestBuilder, RequestLike, TextMessages};
 
@@ -196,6 +196,8 @@ impl Model {
             model_id: model_id.map(|s| s.to_string()),
             truncate_sequence,
         }));
+
+        info!("send_chat_request_with_model {request:?}");
 
         self.runner.get_sender(model_id)?.send(request).await?;
 

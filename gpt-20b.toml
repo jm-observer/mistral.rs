@@ -1,0 +1,46 @@
+# 这里的 command 可以是 "serve" (启动 HTTP 服务) 或 "run" (进入交互模式)
+command = "serve"
+
+[global]
+# 设定随机数种子，如果你希望每次运行产生的输出完全一致，可以将其解注
+# seed = 42
+# 记录日志信息到文件
+# log = "mistralrs.log"
+
+[server]
+# HTTP 服务监听的端口
+port = 12340
+# 监听的 IP，0.0.0.0 表示允许外部访问
+host = "0.0.0.0"
+# 是否开启内置的 Web UI 界面 (可以通过 http://localhost:1234/ui 访问)
+ui = true
+
+[runtime]
+# 允许同时处理的最大并发请求/序列数
+max_seqs = 32
+# 预保存多少个前缀缓存 (Prefix cache)，优化相同 prompt 的连续对话性能
+prefix_cache_n = 16
+
+[paged_attn]
+# 自动模式下，如果使用 CUDA 显卡则会自动开启 PagedAttention (推荐 "auto")
+mode = "auto"
+# 这里还可以配置 memory_fraction = 0.9 让它仅吃掉你 90% 的可用显存，而不指定 context_len
+# 或者使用 context_len = 8192 强制按上下文长度预开辟显存块
+
+# ---- 模型配置区块 ----
+[[models]]
+# 获取到 openai 自家格式的生成模型
+kind = "text"
+# 就是你想跑的 Hugging Face 模型 ID
+model_id = "openai/gpt-oss-20b"
+# 可以让 mistral.rs 自动探测并根据你的硬件自动分配半精度或是全精度 (一般都是 fp16 或是 bf16)
+dtype = "auto"
+
+[models.quantization]
+# 20B 的模型挺大的 (FP16下可能需要接近 40GB 显存)
+# 下面启用了 ISQ (原地量化) 到 q4k 以节省显存，如果你显存非常充裕（> 40G）可以直接注释甚至删去这一段配置
+# in_situ_quant = "q4k"
+
+# [models.device]
+# 如果需要指定跑在哪个显卡上或者是分跨两张卡跑，可以在这里显式映射，下面这个是注释掉的示例
+# device_layers = ["0:30", "1:30"] # 给 0 和 1 卡各均摊分配层数

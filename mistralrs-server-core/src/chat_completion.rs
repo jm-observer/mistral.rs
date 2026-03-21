@@ -20,7 +20,7 @@ use mistralrs_core::{
 };
 use serde_json::Value;
 use tokio::sync::mpsc::{Receiver, Sender};
-
+use tracing::info;
 use crate::{
     completion_core::{
         convert_stop_tokens, get_dry_sampling_params, handle_completion_error,

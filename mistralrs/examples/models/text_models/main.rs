@@ -20,30 +20,47 @@
 use anyhow::Result;
 use mistralrs::{IsqBits, ModelBuilder, PagedAttentionMetaBuilder, TextMessageRole, TextMessages};
 
-const MODEL_ID: &str = "Qwen/Qwen3-4B";
+const MODEL_ID: &str = "openai/gpt-oss-20b";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let model = ModelBuilder::new(MODEL_ID)
-        .with_auto_isq(IsqBits::Four)
-        .with_logging()
-        .with_paged_attn(PagedAttentionMetaBuilder::default().build()?)
-        .build()
-        .await?;
+    // let model = ModelBuilder::new(MODEL_ID)
+    //     .with_auto_isq(IsqBits::Four)
+    //     .with_logging()
+    //     .with_paged_attn(PagedAttentionMetaBuilder::default().build()?)
+    //     .build()
+    //     .await?;
 
-    let messages = TextMessages::new()
-        .add_message(
-            TextMessageRole::System,
-            "You are an AI agent with a specialty in programming.",
-        )
-        .add_message(
-            TextMessageRole::User,
-            "Hello! How are you? Please write generic binary search function in Rust.",
-        );
+    let is_gpt_oss = MODEL_ID.contains("gpt-oss");
+
+    // GPT-OSS uses custom attention sinks and should not run with PagedAttention.
+    let mut builder = ModelBuilder::new(MODEL_ID).with_logging();
+    if is_gpt_oss {
+    } else {
+        builder = builder
+            .with_auto_isq(IsqBits::Four)
+            .with_paged_attn(PagedAttentionMetaBuilder::default().build()?);
+    }
+
+    let model = builder.build().await?;
+
+    let messages = mistralrs::RequestBuilder::new()
+        .add_message(TextMessageRole::User, "知道今天几号吗？")
+        .set_sampler_max_len(128)
+        .enable_thinking(false);
 
     let response = model.send_chat_request(messages).await?;
 
-    println!("{}", response.choices[0].message.content.as_ref().unwrap());
+    if let Some(content) = response
+        .choices
+        .last()
+        .map(|x| x.message.content.as_ref())
+        .flatten()
+    {
+        println!("{} {content}", response.choices.len());
+    } else {
+        println!("[empty response]");
+    }
     dbg!(
         response.usage.avg_prompt_tok_per_sec,
         response.usage.avg_compl_tok_per_sec

@@ -1,0 +1,76 @@
+# 保存为: gpt-oss-120b-spark.toml
+# 运行: mistralrs from-config --file gpt-oss-120b-spark.toml
+
+command = "serve"
+default_model_id = "openai/gpt-oss-120b"
+
+[global]
+seed = 42
+token_source = "cache"
+# log = "D:/git/mistral.rs-fork/mistralrs.log"
+
+[server]
+host = "0.0.0.0"
+port = 1234
+ui = true
+# mcp_port = 3001
+# mcp_config = "D:/path/to/mcp.toml"
+
+[runtime]
+max_seqs = 1
+no_kv_cache = false
+prefix_cache_n = 4
+enable_search = false
+# chat_template = "D:/path/to/chat_template.json"
+# jinja_explicit = "D:/path/to/chat_template.jinja"
+# search_embedding_model = "embedding-gemma"
+
+[paged_attn]
+# GPT-OSS 不支持 PagedAttention（仓库 docs/GPT_OSS.md 已说明）
+mode = "off"
+cache_type = "Auto"
+# context_len = 4096
+# memory_mb = 0
+# memory_fraction = 0.0
+# block_size = 32
+
+[[models]]
+kind = "text"
+model_id = "openai/gpt-oss-120b"
+dtype = "auto"
+# arch = "gpt-oss"
+
+[models.format]
+format = "plain"
+gqa = 1
+# quantized_file = ""
+# tok_model_id = ""
+
+[models.adapter]
+# lora = ""
+# xlora = ""
+# xlora_order = "D:/path/to/ordering.json"
+# tgt_non_granular_index = 0
+
+[models.quantization]
+# GPT-OSS 的 MoE 专家已是 MXFP4，ISQ 只作用在注意力相关层
+in_situ_quant = "q4k"
+# from_uqff = "D:/path/to/model-0.uqff"
+isq_organization = "default"
+# imatrix = "D:/path/to/file.imatrix"
+# calibration_file = "D:/path/to/calibration.txt"
+
+[models.device]
+cpu = false
+# 单设备可不填 device_layers，让其自动映射
+# device_layers = ["0:999"]
+# topology = "D:/git/mistral.rs-fork/topologies/your_topology.yaml"
+# hf_cache = "D:/hf-cache"
+max_seq_len = 4096
+max_batch_size = 1
+
+[models.vision]
+# GPT-OSS 文本模型，这里保留默认空配置
+# max_edge = 1024
+# max_num_images = 1
+# max_image_length = 1024

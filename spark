@@ -1,0 +1,12 @@
+NVIDIA DGX Spark 是一款紧凑型桌面 AI 超级计算机，由 NVIDIA GB10 Grace Blackwell 超级芯片提供支持。它提供高达 1 petaFLOP 的 FP4 精度 AI 计算性能，使其成为需要桌面级强大 AI 功能的开发人员、研究人员和数据科学家的理想选择。
+
+主要规格
+规格	详情
+AI 性能	高达 1 PFLOP (FP4)
+GPU	NVIDIA Blackwell 架构，配备第五代 Tensor Cores 和第四代 RT Cores
+CPU	20 核 Arm 处理器（10 个 Cortex-X925 + 10 个 Cortex-A725）
+内存	128 GB LPDDR5x 统一系统内存，256 位接口，4266 MHz，273 GB/秒 带宽
+存储	1 TB 或 4 TB NVMe M.2，带自加密功能
+网络	1个RJ-45 (10 GbE) 接口，ConnectX-7智能网卡，Wi-Fi 7，蓝牙5.4
+连接性	4个USB Type-C接口，1个HDMI 2.1a接口，HDMI多声道音频
+视频处理	1个NVENC，1个NVDEC

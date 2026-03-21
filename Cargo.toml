@@ -13,7 +13,7 @@ members = [
     "mistralrs-web-chat",
     "mistralrs-audio",
     "mistralrs-mcp",
-    "mistralrs-macros",
+    "mistralrs-macros", "test_toml",
 ]
 resolver = "2"
 

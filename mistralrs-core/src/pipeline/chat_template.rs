@@ -23,6 +23,19 @@ const SUPPORTED_ALTERNATE_EOS: &[&str] = &[
     "<|channel|>",     // Harmony
 ];
 
+// Harmony uses these as structural markers, not generation terminators.
+const HARMONY_NON_TERMINAL_SPECIAL_TOKENS: &[&str] = &[
+    "<|message|>",
+    "<|start|>",
+    "<|channel|>",
+    "<|end|>",
+    "<|call|>",
+];
+
+fn is_harmony_non_terminal_token(tok: &str) -> bool {
+    HARMONY_NON_TERMINAL_SPECIAL_TOKENS.contains(&tok)
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct AddedTokensDecoder {
@@ -141,6 +154,7 @@ pub fn calculate_eos_tokens(
     gen_conf: Option<GenerationConfig>,
     tokenizer: &Tokenizer,
 ) -> Vec<u32> {
+    let is_harmony = chat_template.is_harmony_format();
     let mut eos_tok_ids = chat_template.eos_tok().map(|x| vec![x]).unwrap_or_default();
     let mut bos_tok_ids = chat_template.bos_tok().map(|b| vec![b]).unwrap_or_default();
 
@@ -150,6 +164,9 @@ pub fn calculate_eos_tokens(
         if tokenizer.get_vocab(true).contains_key(*alternate)
             && templates.iter().any(|t| t.contains(*alternate))
         {
+            if is_harmony && is_harmony_non_terminal_token(alternate) {
+                continue;
+            }
             eos_tok_ids.push(alternate.to_string())
         }
     }
@@ -164,6 +181,9 @@ pub fn calculate_eos_tokens(
                 let s = tokenizer
                     .decode(&[id], false)
                     .unwrap_or_else(|_| panic!("Unable to decode id {id})"));
+                if is_harmony && is_harmony_non_terminal_token(&s) {
+                    continue;
+                }
                 if !eos_tok_ids.contains(&s) {
                     eos_tok_ids.push(s);
                 }
@@ -187,6 +207,9 @@ pub fn calculate_eos_tokens(
     }
 
     eos_tok_ids = eos_tok_ids.into_iter().dedup().collect::<Vec<_>>();
+    if is_harmony {
+        eos_tok_ids.retain(|tok| !is_harmony_non_terminal_token(tok));
+    }
     bos_tok_ids = bos_tok_ids.into_iter().dedup().collect::<Vec<_>>();
 
     let bos_render = bos_tok_ids
